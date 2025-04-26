@@ -12,10 +12,19 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const allowedOrigins = ['https://ifd.vercel.app', 'https://otro-dominio.com'];
+
 app.use(cors({
-  origin: 'https://ifd.vercel.app/', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
+  origin: (origin, callback) => {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);  // Permite la solicitud
+    } else {
+      callback(new Error('No autorizado'), false);  // Bloquea la solicitud
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 }));
+
 app.use(express.json());  // Middleware para parsear los cuerpos de las solicitudes como JSON
 
 // Sirve los archivos estáticos desde la carpeta 'uploads'
