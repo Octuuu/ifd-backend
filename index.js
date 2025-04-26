@@ -12,11 +12,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors({
-  origin: 'https://ifd.vercel.app/', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
-}));
-
+app.use(cors());  // Habilitar CORS para permitir solicitudes desde otros dominios
 app.use(express.json());  // Middleware para parsear los cuerpos de las solicitudes como JSON
 
 // Sirve los archivos estáticos desde la carpeta 'uploads'
