@@ -12,10 +12,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Define los orígenes permitidos
 const allowedOrigins = ['https://ifd.vercel.app', 'https://otro-dominio.com'];
 
 app.use(cors({
   origin: (origin, callback) => {
+    // Si el origen está en la lista de orígenes permitidos o no hay origen (para solicitudes desde el mismo servidor)
     if (allowedOrigins.includes(origin) || !origin) {
       callback(null, true);  // Permite la solicitud
     } else {
@@ -23,9 +25,17 @@ app.use(cors({
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],  // Especificar cabeceras permitidas
+  credentials: true,  // Permite el uso de credenciales (como cookies)
 }));
 
 app.use(express.json());  // Middleware para parsear los cuerpos de las solicitudes como JSON
+
+// Habilitar CORS solo para la carpeta de archivos estáticos (imágenes)
+app.use('/uploads', cors({
+  origin: 'https://ifd.vercel.app', // Asegúrate de que el dominio de tu frontend esté permitido
+  methods: ['GET']
+}));
 
 // Sirve los archivos estáticos desde la carpeta 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -47,5 +57,9 @@ sequelize.sync().then(() => {
 // Middleware para manejo de errores
 app.use((err, req, res, next) => {
   console.error(err);
+  // Si el error es de CORS, se podría devolver un mensaje más específico
+  if (err.message === 'No autorizado') {
+    return res.status(403).json({ message: 'Acceso no autorizado por CORS' });
+  }
   res.status(500).json({ message: 'Ha ocurrido un error interno en el servidor' });
 });
