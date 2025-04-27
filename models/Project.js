@@ -1,23 +1,24 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/database.js'; // ✅
+import sequelize from '../config/database.js'; // ✅ Cambiado a database.js
 
 const Project = sequelize.define('Project', {
   title: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: false
   },
   description: {
     type: DataTypes.TEXT,
-    allowNull: false,
+    allowNull: false
   },
   pdf: {
     type: DataTypes.STRING,
-    allowNull: false, // Ruta local del archivo PDF
+    allowNull: false
   },
   image: {
     type: DataTypes.STRING,
-    allowNull: false, // Ruta local de la imagen
-  },
+    allowNull: false
+  }
 });
 
+// Exporta el modelo correctamente con la sintaxis ES6
 export default Project;

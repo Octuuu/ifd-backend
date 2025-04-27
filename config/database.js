@@ -1,13 +1,10 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
 import { Sequelize } from 'sequelize';
-
 
 const sequelize = new Sequelize({
   dialect: 'sqlite',
-  storage: './database.sqlite',
+  storage: './comments.sqlite',
   logging: false
 });
 
+// Exportar el objeto sequelize con la sintaxis ES6
 export default sequelize;

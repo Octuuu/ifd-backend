@@ -1,23 +1,16 @@
 import express from 'express';
 import multer from 'multer';
-import { createProject, getProjects, deleteProject } from '../controllers/projectController.js'; // ✅ Funciones del controlador
-import path from 'path'; // Necesario para manejar rutas de archivos
+import { createProject, getProjects, deleteProject } from '../controllers/projectController.js'; // Importa las funciones del controlador
 
 const router = express.Router();
 
-// Configuración de multer: guardamos archivos en el disco
+// Configuración de multer para manejar la subida de archivos
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Define la carpeta de destino según el tipo de archivo
-    if (file.fieldname === 'pdf') {
-      cb(null, path.join(__dirname, '..', 'uploads', 'pdf')); // Ruta para archivos PDF
-    } else if (file.fieldname === 'image') {
-      cb(null, path.join(__dirname, '..', 'uploads', 'images')); // Ruta para imágenes
-    }
+    cb(null, 'uploads/'); // Carpeta de destino
   },
-  filename: (req, file, cb) => {
-    // Definimos el nombre del archivo, usando el original
-    cb(null, `${Date.now()}_${file.originalname}`);
+  filename: (_, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`); // Nombre único para el archivo
   }
 });
 
@@ -27,12 +20,10 @@ const upload = multer({ storage });
 router.post('/proyectos', upload.fields([
   { name: 'image', maxCount: 1 },
   { name: 'pdf', maxCount: 1 }
-]), createProject);
+]), createProject);  // Usa la función del controlador
 
 // Ruta para obtener todos los proyectos
-router.get('/proyectos', getProjects);
-
-// Ruta para eliminar un proyecto
+router.get('/proyectos', getProjects);  // Usa la función del controlador
 router.delete('/proyectos/:id', deleteProject);
 
-export default router;
+export default router;  // Usa export default en lugar de module.exports

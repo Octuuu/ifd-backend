@@ -1,6 +1,11 @@
-import Project from '../models/Project.js';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
+import Project from '../models/Project.js';
+
+// 👇 Solución para __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Función para manejar la creación de proyectos
 export const createProject = async (req, res) => {
@@ -14,20 +19,28 @@ export const createProject = async (req, res) => {
     const pdf = req.files.pdf[0];
     const image = req.files.image[0];
 
-    // Guardar los archivos localmente
-    const pdfPath = path.join(__dirname, '..', 'uploads', 'pdf', pdf.filename);
-    const imagePath = path.join(__dirname, '..', 'uploads', 'images', image.filename);
+    const pdfPath = path.join(__dirname, '../uploads', pdf.filename);
+    const imagePath = path.join(__dirname, '../uploads', image.filename);
 
-    // Mover los archivos a las carpetas correspondientes
-    fs.renameSync(pdf.path, pdfPath);
-    fs.renameSync(image.path, imagePath);
+    const moveFile = (file, destPath) => {
+      return new Promise((resolve, reject) => {
+        fs.rename(file.path, destPath, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+    };
 
-    // Crear el proyecto en la base de datos
+    await Promise.all([
+      moveFile(pdf, pdfPath),
+      moveFile(image, imagePath),
+    ]);
+
     const project = await Project.create({
       title,
       description,
-      pdf: pdfPath,    // Guardamos la ruta local del archivo PDF
-      image: imagePath, // Guardamos la ruta local de la imagen
+      pdf: pdf.filename,  // Solo el nombre, no la ruta completa
+      image: image.filename,
     });
 
     res.status(201).json({ message: 'Proyecto creado con éxito', project });
@@ -57,16 +70,16 @@ export const deleteProject = async (req, res) => {
       return res.status(404).json({ message: 'Proyecto no encontrado.' });
     }
 
-    // Eliminar archivos locales
-    const pdfPath = project.pdf;
-    const imagePath = project.image;
+    // Eliminar archivos asociados (imagen y PDF)
+    const pathToImage = path.join(__dirname, '../uploads', project.image);
+    const pathToPDF = path.join(__dirname, '../uploads', project.pdf);
 
-    if (fs.existsSync(pdfPath)) {
-      fs.unlinkSync(pdfPath);
-    }
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
-    }
+    // Eliminar archivos del sistema
+    [pathToImage, pathToPDF].forEach((filePath) => {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    });
 
     await project.destroy(); // Eliminar de la base de datos
 
