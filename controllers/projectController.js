@@ -1,11 +1,5 @@
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
 import Project from '../models/Project.js';
-
-// 👇 Solución para __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import cloudinary from '../config/cloudinary.js';
 
 // Función para manejar la creación de proyectos
 export const createProject = async (req, res) => {
@@ -19,28 +13,14 @@ export const createProject = async (req, res) => {
     const pdf = req.files.pdf[0];
     const image = req.files.image[0];
 
-    const pdfPath = path.join(__dirname, '../uploads', pdf.filename);
-    const imagePath = path.join(__dirname, '../uploads', image.filename);
-
-    const moveFile = (file, destPath) => {
-      return new Promise((resolve, reject) => {
-        fs.rename(file.path, destPath, (err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      });
-    };
-
-    await Promise.all([
-      moveFile(pdf, pdfPath),
-      moveFile(image, imagePath),
-    ]);
-
+    // Los archivos ya fueron subidos a Cloudinary, solo tomamos las URL
     const project = await Project.create({
       title,
       description,
-      pdf: pdf.filename,  // Solo el nombre, no la ruta completa
-      image: image.filename,
+      pdf: pdf.path,    // URL pública de Cloudinary
+      image: image.path,
+      pdf_public_id: pdf.filename,  // Guardamos el public_id si quieres borrar después
+      image_public_id: image.filename,
     });
 
     res.status(201).json({ message: 'Proyecto creado con éxito', project });
@@ -70,16 +50,17 @@ export const deleteProject = async (req, res) => {
       return res.status(404).json({ message: 'Proyecto no encontrado.' });
     }
 
-    // Eliminar archivos asociados (imagen y PDF)
-    const pathToImage = path.join(__dirname, '../uploads', project.image);
-    const pathToPDF = path.join(__dirname, '../uploads', project.pdf);
+    // Borrar archivos de Cloudinary
+    const deletePromises = [];
 
-    // Eliminar archivos del sistema
-    [pathToImage, pathToPDF].forEach((filePath) => {
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-    });
+    if (project.pdf_public_id) {
+      deletePromises.push(cloudinary.uploader.destroy(project.pdf_public_id, { resource_type: 'raw' }));
+    }
+    if (project.image_public_id) {
+      deletePromises.push(cloudinary.uploader.destroy(project.image_public_id, { resource_type: 'image' }));
+    }
+
+    await Promise.all(deletePromises);
 
     await project.destroy(); // Eliminar de la base de datos
 
