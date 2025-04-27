@@ -1,5 +1,6 @@
 import Project from '../models/Project.js';
-import cloudinary from '../config/cloudinary.js';
+import path from 'path';
+import fs from 'fs';
 
 // Función para manejar la creación de proyectos
 export const createProject = async (req, res) => {
@@ -13,14 +14,20 @@ export const createProject = async (req, res) => {
     const pdf = req.files.pdf[0];
     const image = req.files.image[0];
 
-    // Los archivos ya fueron subidos a Cloudinary, solo tomamos las URL
+    // Guardar los archivos localmente
+    const pdfPath = path.join(__dirname, '..', 'uploads', 'pdf', pdf.filename);
+    const imagePath = path.join(__dirname, '..', 'uploads', 'images', image.filename);
+
+    // Mover los archivos a las carpetas correspondientes
+    fs.renameSync(pdf.path, pdfPath);
+    fs.renameSync(image.path, imagePath);
+
+    // Crear el proyecto en la base de datos
     const project = await Project.create({
       title,
       description,
-      pdf: pdf.path,    // URL pública de Cloudinary
-      image: image.path,
-      pdf_public_id: pdf.filename,  // Guardamos el public_id si quieres borrar después
-      image_public_id: image.filename,
+      pdf: pdfPath,    // Guardamos la ruta local del archivo PDF
+      image: imagePath, // Guardamos la ruta local de la imagen
     });
 
     res.status(201).json({ message: 'Proyecto creado con éxito', project });
@@ -50,17 +57,16 @@ export const deleteProject = async (req, res) => {
       return res.status(404).json({ message: 'Proyecto no encontrado.' });
     }
 
-    // Borrar archivos de Cloudinary
-    const deletePromises = [];
+    // Eliminar archivos locales
+    const pdfPath = project.pdf;
+    const imagePath = project.image;
 
-    if (project.pdf_public_id) {
-      deletePromises.push(cloudinary.uploader.destroy(project.pdf_public_id, { resource_type: 'raw' }));
+    if (fs.existsSync(pdfPath)) {
+      fs.unlinkSync(pdfPath);
     }
-    if (project.image_public_id) {
-      deletePromises.push(cloudinary.uploader.destroy(project.image_public_id, { resource_type: 'image' }));
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
     }
-
-    await Promise.all(deletePromises);
 
     await project.destroy(); // Eliminar de la base de datos
 

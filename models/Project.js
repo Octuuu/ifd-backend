@@ -12,21 +12,12 @@ const Project = sequelize.define('Project', {
   },
   pdf: {
     type: DataTypes.STRING,
-    allowNull: false, // URL del PDF en Cloudinary
-  },
-  pdf_public_id: {
-    type: DataTypes.STRING, // Public ID del PDF en Cloudinary
-    allowNull: false,
+    allowNull: false, // Ruta local del archivo PDF
   },
   image: {
     type: DataTypes.STRING,
-    allowNull: false, // URL de la imagen en Cloudinary
-  },
-  image_public_id: {
-    type: DataTypes.STRING, // Public ID de la imagen en Cloudinary
-    allowNull: false,
+    allowNull: false, // Ruta local de la imagen
   },
 });
 
-// Exporta el modelo correctamente
 export default Project;

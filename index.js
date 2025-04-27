@@ -5,12 +5,24 @@ import sequelize from './config/database.js';
 import commentRoutes from './routes/comments.js';
 import proyectosRoutes from './routes/projectRoutes.js';
 import { fileURLToPath } from 'url';  // Importa fileURLToPath
+import multer from 'multer';
 
 // Obtén el directorio actual usando fileURLToPath
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Configuración de multer: almacenamiento en disco (para guardar archivos localmente)
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, 'uploads'));  // Carpeta 'uploads' para almacenar archivos
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);  // Asegura nombres únicos para los archivos
+  }
+});
+const upload = multer({ storage });
 
 // Define los orígenes permitidos
 const allowedOrigins = ['https://ifd.vercel.app', 'https://otro-dominio.com'];

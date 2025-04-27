@@ -1,11 +1,26 @@
 import express from 'express';
 import multer from 'multer';
 import { createProject, getProjects, deleteProject } from '../controllers/projectController.js'; // ✅ Funciones del controlador
+import path from 'path'; // Necesario para manejar rutas de archivos
 
 const router = express.Router();
 
-// Configuración de multer: memoria en vez de guardar en disco (¡mejor para Cloudinary!)
-const storage = multer.memoryStorage(); // 🔥
+// Configuración de multer: guardamos archivos en el disco
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    // Define la carpeta de destino según el tipo de archivo
+    if (file.fieldname === 'pdf') {
+      cb(null, path.join(__dirname, '..', 'uploads', 'pdf')); // Ruta para archivos PDF
+    } else if (file.fieldname === 'image') {
+      cb(null, path.join(__dirname, '..', 'uploads', 'images')); // Ruta para imágenes
+    }
+  },
+  filename: (req, file, cb) => {
+    // Definimos el nombre del archivo, usando el original
+    cb(null, `${Date.now()}_${file.originalname}`);
+  }
+});
+
 const upload = multer({ storage });
 
 // Ruta para crear un nuevo proyecto
