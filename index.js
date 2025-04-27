@@ -4,16 +4,15 @@ import cors from 'cors';
 import sequelize from './config/database.js';  
 import commentRoutes from './routes/comments.js';
 import proyectosRoutes from './routes/projectRoutes.js';
-import { fileURLToPath } from 'url';  // Importa fileURLToPath
+import { fileURLToPath } from 'url';  
 
-// Obtén el directorio actual usando fileURLToPath
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Define los orígenes permitidos
-const allowedOrigins = ['https://ifd.vercel.app', 'https://otro-dominio.com'];
+const allowedOrigins = ['https://ifd.vercel.app'];
 
 app.use(cors({
   origin: (origin, callback) => {
