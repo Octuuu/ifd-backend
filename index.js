@@ -32,7 +32,7 @@ app.use(express.json());  // Middleware para parsear los cuerpos de las solicitu
 
 // Habilitar CORS solo para la carpeta de archivos estáticos (imágenes)
 app.use('/uploads', cors({
-  origin: 'https://ifd.vercel.app', // Asegúrate de que el dominio de tu frontend esté permitido
+  origin: 'https://formaciondocente.netlify.app/', // Asegúrate de que el dominio de tu frontend esté permitido
   methods: ['GET']
 }));
 
