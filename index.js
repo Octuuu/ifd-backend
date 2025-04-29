@@ -12,7 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Define los orígenes permitidos
-const allowedOrigins = ['https://formaciondocente.netlify.app/'];
+const allowedOrigins = ['https://formaciondocente.netlify.app'];
 //'https://ifd.vercel.app', 
 app.use(cors({
   origin: (origin, callback) => {
