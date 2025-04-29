@@ -6,5 +6,4 @@ const sequelize = new Sequelize({
   logging: false
 });
 
-// Exportar el objeto sequelize con la sintaxis ES6
 export default sequelize;

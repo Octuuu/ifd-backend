@@ -12,8 +12,8 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Define los orígenes permitidos
-const allowedOrigins = ['https://ifd.vercel.app'];
-
+const allowedOrigins = ['https://formaciondocente.netlify.app/'];
+//'https://ifd.vercel.app', 
 app.use(cors({
   origin: (origin, callback) => {
     // Si el origen está en la lista de orígenes permitidos o no hay origen (para solicitudes desde el mismo servidor)
