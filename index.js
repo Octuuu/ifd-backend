@@ -12,7 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Define los orígenes permitidos
-const allowedOrigins = ['https://formaciondocente.netlify.app'];
+const allowedOrigins = ['https://formaciondocente.netlify.app', 'https://ifd.vercel.app'];
 //'https://ifd.vercel.app', 
 app.use(cors({
   origin: (origin, callback) => {
@@ -32,7 +32,17 @@ app.use(express.json());  // Middleware para parsear los cuerpos de las solicitu
 
 // Habilitar CORS solo para la carpeta de archivos estáticos (imágenes)
 app.use('/uploads', cors({
-  origin: 'https://formaciondocente.netlify.app', // Asegúrate de que el dominio de tu frontend esté permitido
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      'https://formaciondocente.netlify.app',
+      'https://ifd.vercel.app'
+    ];
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('No autorizado'), false);
+    }
+  },
   methods: ['GET']
 }));
 
